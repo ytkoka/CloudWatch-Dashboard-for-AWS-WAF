@@ -1,0 +1,383 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudWatch Dashboard for AWS WAF
+Parameters:
+    WebACLName:
+        Description: Web ACL Name
+        Type: String
+    WAFRegion:
+        Description: WAF Region
+        Type: String
+        Default: us-east-1
+    CWWAFLogName:
+        Description: CloudWatch Log Name
+        Type: String
+
+Resources:
+    lambdaFunction:
+        Type: AWS::Lambda::Function
+        Properties:
+            Code:
+                ZipFile: |
+                    const aws = require('aws-sdk')
+
+                    const CHECK_QUERY_STATUS_DELAY_MS = 250;
+                    const CSS = '<style>td { white-space: nowrap; }</style>'
+                    const ORIGINAL_QUERY = 'fields @timestamp, @message | sort @timestamp desc | limit 20';
+
+                    const DOCS = `
+                    ## Run Logs Insights Query
+                    Runs a Logs Insights query and displays results in a table.
+
+                    ### Widget parameters
+                    Param | Description
+                    ---|---
+                    **logGroups** | The log groups (comma-separated) to run query against
+                    **query** | The query to run
+                    **region** | The region to run the query in
+
+                    ### Example parameters
+                    \`\`\` yaml
+                    logGroups: ${process.env.AWS_LAMBDA_LOG_GROUP_NAME}
+                    query: '${ORIGINAL_QUERY}'
+                    region: ${process.env.AWS_REGION}
+                    \`\`\`
+                    `;
+
+                    const runQuery = async (logsClient, logGroups, queryString, startTime, endTime) => {
+                        const startQuery = await logsClient.startQuery({
+                                logGroupNames: logGroups.replace(/\s/g, '').split(','),
+                                queryString,
+                                startTime,
+                                endTime
+                            }).promise();
+                        const queryId = startQuery.queryId;
+
+                        while (true) {
+                            const queryResults = await logsClient.getQueryResults({ queryId }).promise();
+                            if (queryResults.status !== 'Complete') {
+                                await sleep(CHECK_QUERY_STATUS_DELAY_MS);     // Sleep before calling again
+                            } else {
+                                return queryResults.results;
+                            }
+                        }
+                    };
+
+                    const sleep = async (delay) => {
+                        return new Promise((resolve) => setTimeout(resolve, delay));
+                    };
+
+                    const displayResults = async (logGroups, query, results, context) => {
+                        let html = `
+                            <form><table>
+                                <tr>
+                                    <td>Log Groups</td><td><input name="logGroups" value="${logGroups}" size="100"></td>
+                                </tr><tr>
+                                    <td valign=top>Query</td><td><textarea name="query" rows="2" cols="80">${query}</textarea></td>
+                                </tr>
+                            </table></form>
+                            <a class="btn btn-primary">Run query</a>
+                            <cwdb-action action="call" endpoint="${context.invokedFunctionArn}"></cwdb-action>
+                            <a class="btn">Reset to original query</a>
+                            <cwdb-action action="call" endpoint="${context.invokedFunctionArn}">
+                                { "resetQuery": true }
+                            </cwdb-action>
+                            <p>
+                            <h2>Results</h2>
+                        `;
+                        const stripPtr = result => result.filter(entry => entry.field !== '@ptr');
+
+                        if (results && results.length > 0) {
+                            const cols = stripPtr(results[0]).map(entry => entry.field);
+                            
+                            html += `<table><thead><tr><th>${cols.join('</th><th>')}</th></tr></thead><tbody>`;
+                      
+                            results.forEach(row => {
+                                const vals = stripPtr(row).map(entry => entry.value);
+                                html += `<tr><td>${vals.join('</td><td>')}</td></tr>`;
+                            });
+                      
+                            html += `</tbody></table>`
+                        } else {
+                            html += `<pre>${JSON.stringify(results, null, 4)}</pre>`;
+                        }
+                        
+                        return html;
+                    };
+
+                    exports.handler = async (event, context) => {
+                        if (event.describe) {
+                            return DOCS;   
+                        }
+
+                        const widgetContext = event.widgetContext;
+                        const form = widgetContext.forms.all;
+                        const logGroups = form.logGroups || event.logGroups;
+                        const region = widgetContext.params.region || event.region || process.env.AWS_REGION;
+                        const timeRange = widgetContext.timeRange.zoom || widgetContext.timeRange;
+                        const logsClient = new aws.CloudWatchLogs({ region });
+                        const resetQuery = event.resetQuery;
+                        
+                        let query = form.query || event.query;
+                        if (resetQuery) {
+                            query = widgetContext.params.query || ORIGINAL_QUERY;
+                        }
+
+                        let results;
+
+                        if (query && query.trim() !== '') {
+                            try {
+                                results = await runQuery(logsClient, logGroups, query, timeRange.start, timeRange.end);
+                            } catch (e) {
+                                results = e;
+                            }
+                        }
+
+                        return CSS + await displayResults(logGroups, query, results, context);
+                    };
+            Description: "CloudWatch Custom Widget sample: display results of CloudWatch Logs insights queries"
+            FunctionName: !Sub ${AWS::StackName}
+            Handler: index.handler
+            MemorySize: 128
+            Role: !GetAtt lambdaIAMRole.Arn
+            Runtime: nodejs12.x
+            Timeout: 60
+            Tags:
+                - Key: cw-custom-widget
+                  Value: describe:readOnly
+
+    lambdaIAMRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Action:
+                          - sts:AssumeRole
+                      Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+            Policies:
+                - PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Action:
+                                - logs:CreateLogGroup
+                                - logs:CreateLogStream
+                                - logs:PutLogEvents
+                            Effect: Allow
+                            Resource:
+                                - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}:*
+                  PolicyName: lambda
+                - PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Action:
+                                - logs:StartQuery
+                                - logs:GetQueryResults
+                            Effect: Allow
+                            Resource:
+                                - "*"
+                  PolicyName: cloudwatchRunsLogsInsightsQueries
+
+    lambdaLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub /aws/lambda/${AWS::StackName}
+            RetentionInDays: 7
+
+    DashboardSideBySide:
+        Type: AWS::CloudWatch::Dashboard
+        Properties:
+            DashboardName: !Sub "${AWS::StackName}"
+            DashboardBody: !Sub |
+                {
+                    "widgets": [
+                        {
+                            "type": "metric",
+                            "height": 6,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0,
+                            "properties": {
+                                "metrics": [
+                                    [ "AWS/WAFV2", "AllowedRequests", "WebACL", "${WebACLName}", "Region", "${WAFRegion}", "Rule", "ALL", { "id": "m1" } ],
+                                    [ ".", "BlockedRequests", ".", ".", ".", ".", ".", ".", { "id": "m2" } ]
+                                ],
+                                "view": "timeSeries",
+                                "stacked": true,
+                                "region": "${WAFRegion}",
+                                "stat": "Average",
+                                "title": "Allowed vs Blocked Requests",
+                                "period": 300,
+                                "yAxis": {
+                                    "left": {
+                                        "showUnits": false
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 6,
+                            "x": 6,
+                            "y": 6,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields httpRequest.clientIp\n| stats count(*) as requestCount by httpRequest.country\n| sort requestCount desc\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Top Countries",
+                                "view": "table"
+                            }
+                        },
+                        {
+                            "type": "metric",
+                            "height": 6,
+                            "width": 6,
+                            "x": 12,
+                            "y": 0,
+                            "properties": {
+                                "metrics": [
+                                    [ { "id": "e1", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"AllowedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                    [ { "id": "e2", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"BlockedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                    [ { "id": "e3", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"AllowedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                    [ { "id": "e4", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"BlockedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                    [ { "id": "e5", "expression": "SUM([e3,e4])", "label": "Bot requests", "color": "#FF7F0E" } ],
+                                    [ { "id": "e6", "expression": "SUM([e1,e2,-e3,-e4])", "label": "Non-bot requests", "color": "#1F77B4" } ]
+                                ],
+                                "view": "timeSeries",
+                                "stacked": true,
+                                "region": "${WAFRegion}",
+                                "stat": "Average",
+                                "title": "Bot requests and non-bot requests",
+                                "period": 300,
+                                "liveData": false,
+                                "yAxis": {
+                                    "left": {
+                                        "showUnits": false,
+                                        "min": 0
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "type": "metric",
+                            "height": 6,
+                            "width": 6,
+                            "x": 18,
+                            "y": 0,
+                            "properties": {
+                                "metrics": [
+                                    [ { "id": "e1", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"AllowedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                    [ { "id": "e2", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"BlockedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                    [ { "id": "e3", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"AllowedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                    [ { "id": "e4", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"BlockedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                    [ { "id": "e5", "expression": "SUM([e1,e2,-e3,-e4])", "period": 300, "visible": false } ],
+                                    [ { "id": "e6", "expression": "(SUM([e3,e4]) / SUM([e1,e2])) * 100", "period": 300, "label": "Bot requests", "color": "#FF7F0E" } ],
+                                    [ { "id": "e7", "expression": "(e5 / SUM([e1,e2])) * 100", "period": 300, "label": "Non-bot requests", "color": "#1F77B4" } ]
+                                ],
+                                "view": "singleValue",
+                                "region": "${WAFRegion}",
+                                "stat": "Average",
+                                "title": "All requests, in percentages",
+                                "period": 300,
+                                "liveData": false,
+                                "setPeriodToTimeRange": true
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 12,
+                            "x": 0,
+                            "y": 10,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like \"COUNT\"\n| sort @timestamp desc\n| parse @message '\"nonTerminatingMatchingRules\":[{*}]' as nonTerminatingMatchingRules\n| parse @message '\"excludedRules\":[{*}]' as excludedRules\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, excludedRules, nonTerminatingMatchingRules\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Counted Requests",
+                                "view": "table"
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 12,
+                            "x": 12,
+                            "y": 6,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter terminatingRuleType =\"RATE_BASED\" \n| sort @timestamp desc\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, terminatingRuleId\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": " Blocked requests by Rate based rule",
+                                "view": "table"
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields terminatingRuleId\n| stats count(*) as requestCount by terminatingRuleId\n| sort requestCount desc\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Top Terminating Rules",
+                                "view": "pie"
+                            }
+                        },
+                        {
+                            "type": "metric",
+                            "height": 6,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0,
+                            "properties": {
+                                "metrics": [
+                                    [ "AWS/WAFV2", "CountedRequests", "WebACL", "${WebACLName}", "Region", "${WAFRegion}", "Rule", "ALL" ]
+                                ],
+                                "view": "timeSeries",
+                                "stacked": true,
+                                "region": "${WAFRegion}",
+                                "title": "All Counted Requests",
+                                "period": 300,
+                                "yAxis": {
+                                    "left": {
+                                        "showUnits": false
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 12,
+                            "x": 12,
+                            "y": 10,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like /\"action\":\"BLOCK\"/\n| sort @timestamp desc\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, terminatingRuleId\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Blocked Requests",
+                                "view": "table"
+                            }
+                        },
+                        {
+                          "type": "custom",
+                          "width": 24,
+                          "height": 10,
+                          "properties": {
+                              "endpoint": "${lambdaFunction.Arn}",
+                              "params": {
+                                  "region": "${WAFRegion}",
+                                  "logGroups": "${CWWAFLogName}",
+                                  "query": "fields @timestamp, @message | sort @timestamp desc | limit 20"
+                              },
+                              "title": "Logs Insights Query, ${WAFRegion}"
+                        }
+                      }
+
+                    ]
+                }
+Outputs:
+    Dashboard:
+        Description: "Dashboard created to monitor AWS WAF"
+        Value: !Sub |
+            "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${AWS::StackName}"
