@@ -1,5 +1,5 @@
 # CloudWatch Dashboard for AWS WAF
-CloudFormation template for creating CloudWatch dashboards for AWS WAF.　This dashboard uses only CloudWatch functionality, making it quick to deploy and easy to customize.
+CloudFormation template for creating CloudWatch dashboards for AWS WAF. This dashboard uses only CloudWatch functionality, making it quick to deploy and easy to customize.
  
 ## CloudFormation Input Parameters:
 * WebACL name
