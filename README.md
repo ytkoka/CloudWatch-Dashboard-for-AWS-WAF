@@ -14,6 +14,8 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
  ## Example dashboard:
 ![Dashboard Image](/images/cwd.png)
 
+**Note: This dashboard includes widgets for monitoring bot control rules and rate-based rules. Please customize it according to the rules you are using**
+
 ## CloudFormation templates:
 [Templates](/cloudformation/)
 
@@ -29,7 +31,7 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
 
 [2]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront.yaml
 
-Below templates will create a Lambda function for the CloudWatch Logs insights query custom widget. [Custom Widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard.html) is powered by custom Lambda functions, enabling complete control over the content, layout, and interactions. 
+Below templates will create a Lambda function for the CloudWatch Logs insights query custom widget. [Custom Widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard.html) is powered by custom Lambda functions, enabling complete control over the content, layout, and interactions. see the [custom widgets samples](https://github.com/aws-samples/cloudwatch-custom-widgets-samples)
 
 [Regional WAF + Log insights query widget](/cloudformation/cw-waf-dashboard-regional-logquery.yaml)
 
