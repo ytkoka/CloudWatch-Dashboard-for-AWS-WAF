@@ -31,7 +31,7 @@ The example dashboard includes the following widgets:
 * Blocked Requests 
 * Logs Insights Query Form (Custom widget)
 
-** Please customize it according to the WAF rules you are using. **
+**Please customize it according to the WAF rules you are using.**
 
 ## CloudFormation templates:
 [Templates](/cloudformation/)
