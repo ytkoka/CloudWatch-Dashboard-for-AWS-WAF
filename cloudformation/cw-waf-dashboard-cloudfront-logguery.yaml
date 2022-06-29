@@ -207,7 +207,7 @@ Resources:
                                 "view": "timeSeries",
                                 "stacked": true,
                                 "region": "${WAFRegion}",
-                                "stat": "Average",
+                                "stat": "Sum",
                                 "title": "Allowed vs Blocked Requests",
                                 "period": 300,
                                 "yAxis": {
@@ -227,7 +227,7 @@ Resources:
                                 "query": "SOURCE '${CWWAFLogName}' | fields httpRequest.clientIp\n| stats count(*) as requestCount by httpRequest.country\n| sort requestCount desc\n| limit 100",
                                 "region": "${WAFRegion}",
                                 "title": "Top Countries",
-                                "view": "table"
+                                "view": "pie"
                             }
                         },
                         {
@@ -249,7 +249,7 @@ Resources:
                                 "stacked": true,
                                 "region": "${WAFRegion}",
                                 "stat": "Average",
-                                "title": "Bot requests and non-bot requests",
+                                "title": "Bot requests vs Non-bot requests",
                                 "period": 300,
                                 "liveData": false,
                                 "yAxis": {
@@ -279,7 +279,7 @@ Resources:
                                 "view": "singleValue",
                                 "region": "${WAFRegion}",
                                 "stat": "Average",
-                                "title": "All requests, in percentages",
+                                "title": "Percentage of Bot requests",
                                 "period": 300,
                                 "liveData": false,
                                 "setPeriodToTimeRange": true
@@ -288,9 +288,9 @@ Resources:
                         {
                             "type": "log",
                             "height": 6,
-                            "width": 12,
-                            "x": 0,
-                            "y": 10,
+                            "width": 6,
+                            "x": 12,
+                            "y": 12,
                             "properties": {
                                 "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like \"COUNT\"\n| sort @timestamp desc\n| parse @message '\"nonTerminatingMatchingRules\":[{*}]' as nonTerminatingMatchingRules\n| parse @message '\"excludedRules\":[{*}]' as excludedRules\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, excludedRules, nonTerminatingMatchingRules\n| limit 100",
                                 "region": "${WAFRegion}",
@@ -301,8 +301,8 @@ Resources:
                         {
                             "type": "log",
                             "height": 6,
-                            "width": 12,
-                            "x": 12,
+                            "width": 6,
+                            "x": 18,
                             "y": 6,
                             "properties": {
                                 "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter terminatingRuleType =\"RATE_BASED\" \n| sort @timestamp desc\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, terminatingRuleId\n| limit 100",
@@ -337,6 +337,7 @@ Resources:
                                 "view": "timeSeries",
                                 "stacked": true,
                                 "region": "${WAFRegion}",
+                                "stat": "Sum",
                                 "title": "All Counted Requests",
                                 "period": 300,
                                 "yAxis": {
@@ -349,9 +350,9 @@ Resources:
                         {
                             "type": "log",
                             "height": 6,
-                            "width": 12,
-                            "x": 12,
-                            "y": 10,
+                            "width": 6,
+                            "x": 18,
+                            "y": 12,
                             "properties": {
                                 "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like /\"action\":\"BLOCK\"/\n| sort @timestamp desc\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, terminatingRuleId\n| limit 100",
                                 "region": "${WAFRegion}",
@@ -360,9 +361,48 @@ Resources:
                             }
                         },
                         {
+                            "type": "log",
+                            "height": 6,
+                            "width": 6,
+                            "x": 6,
+                            "y": 12,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like /\"action\":\"BLOCK\"/\n| stats count(*) as requestCount by httpRequest.uri\n| sort requestCount  desc\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Top Blocked URIs",
+                                "view": "table"
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 6,
+                            "x": 0,
+                            "y": 12,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like \"COUNT\"\n| stats count(*) as requestCount by httpRequest.uri\n| sort requestCount  desc\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Top Counted URIs",
+                                "view": "table"
+                            }
+                        },
+                        {
+                            "type": "log",
+                            "height": 6,
+                            "width": 6,
+                            "x": 12,
+                            "y": 6,
+                            "properties": {
+                                "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| parse @message /\\{\"name\":\"[Uu]ser\\-[Aa]gent\\\",\\\"value\\\"\\:\\\"(?<UserAgent>[^\"}]*)/\n| stats count(*) as requestCount by UserAgent\n| sort requestCount desc\n| limit 100",
+                                "region": "${WAFRegion}",
+                                "title": "Top User-agents",
+                                "view": "table"
+                            }
+                        },
+                        {
                             "type": "custom",
-                            "width": 24,
                             "height": 10,
+                            "width": 24,
                             "properties": {
                                 "endpoint": "${lambdaFunction.Arn}",
                                 "params": {
