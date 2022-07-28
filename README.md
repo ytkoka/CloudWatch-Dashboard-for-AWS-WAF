@@ -63,3 +63,11 @@ Below templates will create a Lambda function for the CloudWatch Logs insights q
 [4]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront-logguery.yaml
 
 
+## Cost:
+The cost of this dashboard depends on the following factors :
+* CloudWatch Logs ingest size
+* CloudWatch Logs store size
+* Number of CloudWatch Logs insights queries
+* CloudWatch Logs insights query data ranges
+
+Please see the [CloudWatch pricing page](https://aws.amazon.com/cloudwatch/pricing/) to estimate the dashboard cost.
