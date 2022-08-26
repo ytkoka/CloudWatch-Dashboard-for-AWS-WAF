@@ -34,7 +34,7 @@ The example dashboard includes the following widgets:
 * Top IP addresses and URI combination for all the Blocked requests ([Use Contributor insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html))
 * Counted Requests
 * Blocked Requests 
-* Logs Insights Query Form (Use [Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
+* Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
 
 **Please customize it according to the WAF rules you are using.**
 
@@ -43,29 +43,40 @@ The example dashboard includes the following widgets:
 [Regional WAF](/cloudformation/cw-waf-dashboard-regional.yaml) 
 
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][1]
+
 [1]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-regional.yaml
+
 [CloudFront WAF](/cloudformation/cw-waf-dashboard-cloudfront.yaml) 
 
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][2]
+
 [2]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront.yaml
 
 Below templates will create a Lambda function for the CloudWatch Logs insights query custom widget. [Custom Widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard.html) is powered by custom Lambda functions, enabling complete control over the content, layout, and interactions. see the [custom widgets samples](https://github.com/aws-samples/cloudwatch-custom-widgets-samples)
 
 [Regional WAF](/cloudformation/cw-waf-dashboard-regional-logquery.yaml) 
+
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][3]
+
 [3]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-regional-logquery.yaml
 
 [CloudFront WAF](/cloudformation/cw-waf-dashboard-cloudfront-logguery.yaml) 
+
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][4]
+
 [4]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront-logguery.yaml
 
 Below templates will create a contributor insights rule to get the top IP addresses and URI combination.
 [Regional WAF](/cloudformation/cw-waf-dashboard-regional-contributor-insights.yaml) 
+
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][5]
+
 [5]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-regional-contributor-insights.yaml
 
 [[CloudFront WAF](/cloudformation/cw-waf-dashboard-cloudfront-contributor-insights.yaml) 
+
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][6]
+
 [6]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront-contributor-insights.yaml
 
 ## Cost:
