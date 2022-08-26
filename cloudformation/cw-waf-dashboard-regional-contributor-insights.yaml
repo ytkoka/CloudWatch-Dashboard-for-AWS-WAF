@@ -1,0 +1,298 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudWatch Dashboard for AWS WAF
+Parameters:
+    CWWAFLogName:
+        Description: CloudWatch Log Name
+        Type: String
+    WebACLName:
+        Description: Web ACL Name
+        Type: String
+    WAFRegion:
+        Description: WAF Region
+        Type: String
+        Default: us-east-1
+
+Resources:
+    DashboardSideBySide:
+        Type: AWS::CloudWatch::Dashboard
+        Properties:
+            DashboardName: !Sub "${AWS::StackName}"
+            DashboardBody: !Sub |
+                {
+                    "widgets": [
+                        {
+                            "type": "metric",
+                            "height": 6,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0,
+                            "properties": {
+                                "metrics": [
+                                    [ "AWS/WAFV2", "AllowedRequests", "WebACL", "${WebACLName}", "Region", "${WAFRegion}", "Rule", "ALL", { "id": "m1" } ],
+                                    [ ".", "BlockedRequests", ".", ".", ".", ".", ".", ".", { "id": "m2" } ]
+                                ],
+                                "view": "timeSeries",
+                                "stacked": true,
+                                "region": "${WAFRegion}",
+                                "stat": "Sum",
+                                "title": "Allowed vs Blocked Requests",
+                                    "period": 300,
+                                    "yAxis": {
+                                        "left": {
+                                            "showUnits": false
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "height": 6,
+                                "width": 6,
+                                "x": 6,
+                                "y": 0,
+                                "properties": {
+                                    "metrics": [
+                                        [ "AWS/WAFV2", "CountedRequests", "WebACL", "${WebACLName}", "Region", "${WAFRegion}", "Rule", "ALL" ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": true,
+                                    "region": "${WAFRegion}",
+                                    "stat": "Sum",
+                                    "title": "All Counted Requests",
+                                    "period": 300,
+                                    "yAxis": {
+                                        "left": {
+                                            "showUnits": false
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "height": 6,
+                                "width": 6,
+                                "x": 12,
+                                "y": 0,
+                                "properties": {
+                                    "metrics": [
+                                        [ { "id": "e1", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"AllowedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                        [ { "id": "e2", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"BlockedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                        [ { "id": "e3", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"AllowedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                        [ { "id": "e4", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"BlockedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                        [ { "id": "e5", "expression": "SUM([e3,e4])", "label": "Bot requests", "color": "#FF7F0E" } ],
+                                        [ { "id": "e6", "expression": "SUM([e1,e2,-e3,-e4])", "label": "Non-bot requests", "color": "#1F77B4" } ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": true,
+                                    "region": "${WAFRegion}",
+                                    "stat": "Average",
+                                    "title": "Bot requests vs Non-bot requests",
+                                    "period": 300,
+                                    "liveData": false,
+                                    "yAxis": {
+                                        "left": {
+                                            "showUnits": false,
+                                            "min": 0
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "height": 6,
+                                "width": 6,
+                                "x": 18,
+                                "y": 0,
+                                "properties": {
+                                    "metrics": [
+                                        [ { "id": "e1", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"AllowedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                        [ { "id": "e2", "expression": "SEARCH('{AWS/WAFV2,Region,Rule,WebACL} MetricName=\"BlockedRequests\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\" Rule=\"ALL\"', 'Sum', 300)", "stat": "Sum", "period": 300, "visible": false } ],
+                                        [ { "id": "e3", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"AllowedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                        [ { "id": "e4", "expression": "SEARCH('{AWS/WAFV2,LabelName,LabelNamespace,Region,WebACL} MetricName=\"BlockedRequests\" LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" Region=\"${WAFRegion}\" WebACL=\"${WebACLName}\"', 'Sum', 300)", "period": 300, "visible": false } ],
+                                        [ { "id": "e5", "expression": "SUM([e1,e2,-e3,-e4])", "period": 300, "visible": false } ],
+                                        [ { "id": "e6", "expression": "(SUM([e3,e4]) / SUM([e1,e2])) * 100", "period": 300, "label": "Bot requests", "color": "#FF7F0E" } ],
+                                        [ { "id": "e7", "expression": "(e5 / SUM([e1,e2])) * 100", "period": 300, "label": "Non-bot requests", "color": "#1F77B4" } ]
+                                    ],
+                                    "view": "singleValue",
+                                    "region": "${WAFRegion}",
+                                    "stat": "Average",
+                                    "title": "Percentage of Bot requests",
+                                    "period": 300,
+                                    "liveData": false,
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 6,
+                                "x": 0,
+                                "y": 6,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields terminatingRuleId\n| stats count(*) as requestCount by terminatingRuleId\n| sort requestCount desc\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Top Terminating Rules",
+                                    "view": "pie"
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 6,
+                                "x": 6,
+                                "y": 6,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields httpRequest.clientIp\n| stats count(*) as requestCount by httpRequest.country\n| sort requestCount desc\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Top Countries",
+                                    "view": "pie"
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 6,
+                                "x": 12,
+                                "y": 6,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| parse @message /\\{\"name\":\"[Uu]ser\\-[Aa]gent\\\",\\\"value\\\"\\:\\\"(?<UserAgent>[^\"}]*)/\n| stats count(*) as requestCount by UserAgent\n| sort requestCount desc\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Top User-agents",
+                                    "view": "table"
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 6,
+                                "x": 18,
+                                "y": 6,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields httpRequest.clientIp\n| stats count(*) as requestCount by httpRequest.clientIp\n| sort requestCount desc\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Top IP Addresses",
+                                    "view": "table"
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 6,
+                                "x": 0,
+                                "y": 12,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like \"COUNT\"\n| stats count(*) as requestCount by httpRequest.uri\n| sort requestCount  desc\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Top Counted URIs",
+                                    "view": "table"
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 6,
+                                "x": 6,
+                                "y": 12,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like /\"action\":\"BLOCK\"/\n| stats count(*) as requestCount by httpRequest.uri\n| sort requestCount  desc\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Top Blocked URIs",
+                                    "view": "table"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "height": 6,
+                                "width": 12,
+                                "x": 12,
+                                "y": 12,
+                                "properties": {
+                                    "period": 60,
+                                    "insightRule": {
+                                        "maxContributorCount": 10,
+                                        "orderBy": "Sum",
+                                        "ruleName": "TopIPURIforBlockedRequests"
+                                    },
+                                    "stacked": false,
+                                    "view": "timeSeries",
+                                    "yAxis": {
+                                        "left": {
+                                            "showUnits": false
+                                        },
+                                        "right": {
+                                            "showUnits": false
+                                        }
+                                    },
+                                    "region": "${WAFRegion}",
+                                    "title": "Top IP addresses, URI combination for all the Blocked requests",
+                                    "legend": {
+                                        "position": "right"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 12,
+                                "x": 0,
+                                "y": 18,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like \"COUNT\"\n| sort @timestamp desc\n| parse @message '\"nonTerminatingMatchingRules\":[{*}]' as nonTerminatingMatchingRules\n| parse @message '\"excludedRules\":[{*}]' as excludedRules\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, excludedRules, nonTerminatingMatchingRules\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Counted Requests",
+                                    "view": "table"
+                                }
+                            },
+                            {
+                                "type": "log",
+                                "height": 6,
+                                "width": 12,
+                                "x": 12,
+                                "y": 18,
+                                "properties": {
+                                    "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter @message like /\"action\":\"BLOCK\"/\n| sort @timestamp desc\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, terminatingRuleId\n| limit 100",
+                                    "region": "${WAFRegion}",
+                                    "title": "Blocked Requests",
+                                    "view": "table"
+                                }
+                            }
+                        ]
+                }
+    ContributorInsightTopIPURIforBlockedRequests:
+        Type: AWS::CloudWatch::InsightRule
+        Properties:
+            RuleBody: !Sub |
+                {
+                    "Schema": {
+                    "Name": "CloudWatchLogRule",
+                    "Version": 1
+                },
+                "AggregateOn": "Count",
+                "Contribution": {
+                    "Filters": [
+                        {
+                            "Match": "$.action",
+                            "In": [
+                            "BLOCK"
+                            ]
+                        }
+                        ],
+                        "Keys": [
+                            "$.httpRequest.clientIp",
+                            "$.httpRequest.uri"
+                        ]
+                    },
+                    "LogFormat": "JSON",
+                    "LogGroupNames": [
+                        "${CWWAFLogName}"
+                    ]
+                }
+            RuleName: TopIPURIforBlockedRequests
+            RuleState: ENABLED
+
+
+Outputs:
+    Dashboard:
+        Description: "Dashboard created to monitor AWS WAF"
+        Value: !Sub |
+            "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${AWS::StackName}"
