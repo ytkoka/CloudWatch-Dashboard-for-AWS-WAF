@@ -132,9 +132,9 @@ Resources:
                         "x": 18,
                         "y": 6,
                         "properties": {
-                            "query": "SOURCE '${CWWAFLogName}' | fields @timestamp, @message\n| filter terminatingRuleType =\"RATE_BASED\" \n| sort @timestamp desc\n| display @timestamp, httpRequest.clientIp,httpRequest.uri, httpRequest.country, terminatingRuleId\n| limit 100",
+                            "query": "SOURCE '${CWWAFLogName}' | fields httpRequest.clientIp\n| stats count(*) as requestCount by httpRequest.clientIp\n| sort requestCount desc\n| limit 100",
                             "region": "${WAFRegion}",
-                            "title": " Blocked requests by Rate based rule",
+                            "title": "Top IP Addresses",
                             "view": "table"
                         }
                     },
