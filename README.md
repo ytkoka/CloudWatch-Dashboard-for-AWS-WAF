@@ -11,10 +11,10 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
  When the deployment process is complete, we can access the CloudWatch dashboard via its URL. You can find it in the Outputs tab of AWS CloudFormation:
  ![Output Image](/images/output.png)
 
- ## Example dashboard:
-Example(1) includes costom widget
+ ## Dashboard:
+* Example(1) includes costom widget
 ![Dashboard Image1](/images/cwd.png)
-Example(2) includes contributor insights
+* Example(2) includes contributor insights
 ![Dashboard Image2](/images/cwd2.png)
 
 The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
