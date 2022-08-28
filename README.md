@@ -12,8 +12,9 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
  ![Output Image](/images/output.png)
 
  ## Dashboard:
- The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
-* Example(1) includes costom widget
+The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
+
+Example(1) includes costom widget
 ![Dashboard Image1](/images/cwd.png)
 Example(1) dashboard includes the following widgets:
 * Allowed vs Blocked Requests
@@ -29,7 +30,8 @@ Example(1) dashboard includes the following widgets:
 * Counted Requests
 * Blocked Requests 
 * Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
-* Example(2) includes contributor insights
+
+Example(2) includes contributor insights
 ![Dashboard Image2](/images/cwd2.png)
 Example(2) dashboard includes the following widgets:
 * Allowed vs Blocked Requests
