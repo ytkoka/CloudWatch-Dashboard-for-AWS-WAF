@@ -14,9 +14,9 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
  ## Dashboard:
 The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
 
-Example(1) includes costom widget
+Example(1)
 ![Dashboard Image1](/images/cwd.png)
-Example(1) dashboard includes the following widgets:
+Dashboard example(1) includes the following widgets:
 * Allowed vs Blocked Requests
 * All Counted Requests
 * Bot requests vs Non-bot requests (Require Bot control rule group)
@@ -31,9 +31,9 @@ Example(1) dashboard includes the following widgets:
 * Blocked Requests 
 * Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
 
-Example(2) includes contributor insights
+Example(2)
 ![Dashboard Image2](/images/cwd2.png)
-Example(2) dashboard includes the following widgets:
+Dashboard example(2) includes the following widgets:
 * Allowed vs Blocked Requests
 * All Counted Requests
 * Bot requests vs Non-bot requests (Require Bot control rule group)
@@ -62,7 +62,7 @@ Example(2) dashboard includes the following widgets:
 
 [2]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront.yaml
 
-Below templates will create a Lambda function for the CloudWatch Logs insights query custom widget. [Custom Widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard.html) is powered by custom Lambda functions, enabling complete control over the content, layout, and interactions. see the [custom widgets samples](https://github.com/aws-samples/cloudwatch-custom-widgets-samples)
+Below templates will create a Lambda function for the CloudWatch Logs insights query [custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard.html)
 
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][3]
 [Regional WAF](/cloudformation/cw-waf-dashboard-regional-logquery.yaml) 
