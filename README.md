@@ -12,14 +12,26 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
  ![Output Image](/images/output.png)
 
  ## Dashboard:
+ The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
 * Example(1) includes costom widget
 ![Dashboard Image1](/images/cwd.png)
+Example(1) dashboard includes the following widgets:
+* Allowed vs Blocked Requests
+* All Counted Requests
+* Bot requests vs Non-bot requests (Require Bot control rule group)
+* Percentage of Bot requests (Require Bot control rule group)
+* Top Terminating Rules
+* Top Countries
+* Top User-agents
+* Blocked requests by Rate based rule  (Require Rate-based rule)
+* Top Counted URIs
+* Top Blocked URIs
+* Counted Requests
+* Blocked Requests 
+* Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
 * Example(2) includes contributor insights
 ![Dashboard Image2](/images/cwd2.png)
-
-The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
-The example dashboard includes the following widgets:
-
+Example(2) dashboard includes the following widgets:
 * Allowed vs Blocked Requests
 * All Counted Requests
 * Bot requests vs Non-bot requests (Require Bot control rule group)
@@ -28,13 +40,11 @@ The example dashboard includes the following widgets:
 * Top Countries
 * Top User-agents
 * Top IP Addresses
-* Blocked requests by Rate based rule  (Require Rate-based rule)
 * Top Counted URIs
 * Top Blocked URIs
 * Top IP addresses and URI combination for all the Blocked requests ([Use Contributor insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html))
 * Counted Requests
 * Blocked Requests 
-* Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
 
 **Please customize it according to the WAF rules you are using.**
 
@@ -62,7 +72,7 @@ Below templates will create a Lambda function for the CloudWatch Logs insights q
 
 [4]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=WAF-Dashboard&templateURL=https://s3.amazonaws.com/ytkoka-resources/CloudWatch-Dashboard-for-AWS-WAF/cw-waf-dashboard-cloudfront-logguery.yaml
 
-Below templates will create a contributor insights rule to get the top IP addresses and URI combination.
+Below templates will create a [contributor insights rule](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html) to get the top IP addresses and URI combination.
 
 [![launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)][5]
 [Regional WAF](/cloudformation/cw-waf-dashboard-regional-contributor-insights.yaml) 
