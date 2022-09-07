@@ -30,8 +30,8 @@ Dashboard template includes the following widgets:
 * Top Counted URIs
 * Top Blocked URIs
 * Top IP addresses and URI combination for all the Blocked requests ([Use Contributor insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html))
-* Counted Requests
-* Blocked Requests
+* Counted Requests Logs
+* Blocked Requests Logs
 * Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
 
 **Please customize it according to the WAF rules you are using.**
