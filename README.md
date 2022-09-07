@@ -16,26 +16,9 @@ In the next screen, set a name for the stack (it will use as the dashboard name)
  ## Dashboard:
 The dashboard template provides multiple graphs and queries for you that are available out-of-the-box.
 
-Example(1)
-![Dashboard Image1](/images/cwd.png)
-Dashboard example(1) includes the following widgets:
-* Allowed vs Blocked Requests
-* All Counted Requests
-* Bot requests vs Non-bot requests (Require Bot control rule group)
-* Percentage of Bot requests (Require Bot control rule group)
-* Top Terminating Rules
-* Top Countries
-* Top User-agents
-* Blocked requests by Rate based rule  (Require Rate-based rule)
-* Top Counted URIs
-* Top Blocked URIs
-* Counted Requests
-* Blocked Requests 
-* Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
-
-Example(2)
+Example
 ![Dashboard Image2](/images/cwd2.png)
-Dashboard example(2) includes the following widgets:
+Dashboard template includes the following widgets:
 * Allowed vs Blocked Requests
 * All Counted Requests
 * Bot requests vs Non-bot requests (Require Bot control rule group)
@@ -48,7 +31,8 @@ Dashboard example(2) includes the following widgets:
 * Top Blocked URIs
 * Top IP addresses and URI combination for all the Blocked requests ([Use Contributor insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html))
 * Counted Requests
-* Blocked Requests 
+* Blocked Requests
+* Logs Insights Query Form ([Use Custom widget](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_dashboard_about.html))
 
 **Please customize it according to the WAF rules you are using.**
 
@@ -94,5 +78,7 @@ The cost of this dashboard depends on the following factors :
 * CloudWatch Logs store size
 * Number of CloudWatch Logs insights queries
 * CloudWatch Logs insights query data ranges
+* Number of Lambda invocations (If you use the custom widget)
+* Contributor Insights Rule and Matched Log Events (If you use Contributor Insights)
 
 Please see the [CloudWatch pricing page](https://aws.amazon.com/cloudwatch/pricing/) to estimate the dashboard cost.
