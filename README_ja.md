@@ -1,7 +1,7 @@
 # CloudWatch Dashboard for AWS WAF
-AWS WAF 用の CloudWatch ダッシュボードをセットアップするための CloudFormation テンプレートです。 このテンプレートを使用して一般的にWAFで利用されるメトリクスや CloudWatch logs insights を利用した CloudWatch ダッシュボードを迅速にデプロイできます。 AWS WAF で使用している WAF ルール セットに応じて、追加のメトリクスを追加しカスタマイズできます。
+AWS WAF 用の CloudWatch ダッシュボードをセットアップするための CloudFormation テンプレートです。 このテンプレートを使用して一般的にWAFで利用されるメトリクスや CloudWatch logs insights を利用した CloudWatch ダッシュボードを迅速にデプロイできます。 AWS WAF で使用している WAF ルール セットに応じて、メトリクスを追加しカスタマイズできます。
 
-WebACL と CloudWatch Logs をまだ作成していない場合は、[こちら](https://github.com/ytkoka/cfn-example-aws-waf) の CloudFormation テンプレートを使用して WebACL を作成し、CloudWatch ログを有効にすることができます。
+WebACL と CloudWatch Logs をまだ作成していない場合は、[こちら](https://github.com/ytkoka/cfn-example-aws-waf)の CloudFormation テンプレートを使用して WebACL を作成し、CloudWatch ログを有効にすることができます。
  
 ## 導入方法:
 導入するには、下の [Launch Stack] ボタンをクリックするか、テンプレート ファイルをこのリポジトリ (/[cloudformation](/cloudformation/)/) からローカル フォルダーにコピーしてから、CloudFormation サービスで AWS コンソールを開き、[Create Stack] をクリックします。 新しいリソースで選択し、[テンプレート ソース] セクションで [テンプレートファイルのアップロード] を選択し、[ファイルの選択] をクリックして、ローカル フォルダーにコピーしたファイルを選択します。
@@ -21,8 +21,8 @@ WebACL と CloudWatch Logs をまだ作成していない場合は、[こちら]
 ダッシュボード テンプレートには、次のウィジェットが含まれています
 * 許可されたリクエストとブロックされたリクエスト
 * カウントされたすべてのリクエスト
-* ボットリクエストと非ボットリクエスト (ボット制御ルール グループが必要)
-* ボット リクエストの割合 (ボット制御ルール グループが必要)
+* ボットリクエストと非ボットリクエスト (Bot Control ルールグループが必要)
+* ボット リクエストの割合 (Bot Control ルールグループが必要)
 * 上位の Terminating ルール
 * 上位の 国
 * 上位の ユーザーエージェント
