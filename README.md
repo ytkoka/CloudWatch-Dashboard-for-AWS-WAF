@@ -4,7 +4,7 @@
 
 This repository provides CloudFormation templates to quickly set up CloudWatch Dashboard for AWS WAF. This template will allow you to get started more quickly by giving deployable prebuilt CloudWatch dashboards with commonly observed metrics and CloudWatch logs insights. You can add additional metrics depending on the WAF rule set you are using on AWS WAF.
 
-If you have not yet created WebACL and CloudWatch Logs, you can use the CloudFormation template [here](https://github.com/ytkoka/cfn-example-aws-waf) to create a WebACL and enable CloudWatch logging.
+If you have not yet created WebACL and CloudWatch Logs, you can use the CloudFormation template [here](https://github.com/ytkoka/cfn-example-aws-waf/blob/main/aws-waf-template-loggingfilter.yaml) to create a WebACL and enable CloudWatch logging.
  
 ## Installation:
 To do the installation, click the Launch Stack button below or copy the template file from this repository (/[cloudformation](/cloudformation/)/) to a local folder, then open the AWS console in the CloudFormation service, click Create Stack, select with new resources, then in the Template source section select Upload a template file, click Choose file and choose the file you copied to your local folder.
